@@ -11,39 +11,48 @@ const inputUserEl = document.querySelector('.search-input');
 const btnPoistel = document.querySelector('.search-btn');
 const galleryPhoto = document.querySelector('.gallery');
 const hiddenBtn = document.querySelector('.js-load-more');
+const kolichestvoPicters=39
+
 let currentPage = 1;
 let nameOfPoisk = inputUserEl.value;
-let kolichestvoPostov = null;
-let maxPostov = null;
+let kolichestvoPostov = 0;
+let maxPostov = 0;
 
-btnPoistel.addEventListener('click', event => {
+btnPoistel.addEventListener('click',poiskPosleClika)
+async function poiskPosleClika()  {
   event.preventDefault();
   currentPage = 1;
   hiddenBtn.classList.add('is-hidden');
   galleryPhoto.innerHTML = '';
-  const resultOfSearch = expotrPhoto(inputUserEl.value)
+  const resultOfSearch = await expotrPhoto(inputUserEl.value)
     .then(res => {
       if (res.length === 0) {
         return Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again',
         );
       }
+       
       console.log(res);
       galleryPhoto.insertAdjacentHTML('afterbegin', handelBars(res));
-      let nameOfPictures = new SimpleLightbox('.gallery a').refresh;
-
+      let nameOfPictures = new SimpleLightbox('.gallery a');
       hiddenBtn.classList.remove('is-hidden');
+      if(maxPostov <= kolichestvoPicters)
+      {
+        hiddenBtn.classList.add('is-hidden');
+        // console.log("fsdfsdfsd");
+      }
       return res;
+      
     })
     .catch(err => {
       console.log(err);
     });
-});
+};
 
-function expotrPhoto(name) {
+function  expotrPhoto(name) {
   return axios
     .get(
-      `${BASE_URL}/?key=${API_KEY}&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=200`,
+      `${BASE_URL}/?key=${API_KEY}&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=${kolichestvoPicters}`,
     )
     .then(res => {
       console.log(res);
@@ -56,17 +65,22 @@ function expotrPhoto(name) {
     });
 }
 
-hiddenBtn.addEventListener('click', () => {
+async function proslushkaKnopki() {
   currentPage += 1;
-  expotrPhoto(inputUserEl.value).then(res => {
-    
-    console.log(kolichestvoPostov);
-    console.log(maxPostov);
-    if (res.length < 39 || kolichestvoPostov >= maxPostov) {
-      hiddenBtn.classList.add('is-hidden');
-      Notiflix.Notify.info('Вы достигли дна');
-    }
-    galleryPhoto.insertAdjacentHTML('beforeend', handelBars(res));
-    let nameOfPictures = new SimpleLightbox('.gallery a').refresh;
-  });
-});
+  try {
+  const photoNovie=await expotrPhoto(inputUserEl.value)
+  const otrisovka=await photoNovieOtrisovka(photoNovie)
+  }catch (error) {
+    console.log(error.message);
+  }
+   
+}
+hiddenBtn.addEventListener('click',proslushkaKnopki);
+async function photoNovieOtrisovka(name) {
+  if (name.length <= kolichestvoPostov && kolichestvoPostov >= maxPostov) {
+        hiddenBtn.classList.add('is-hidden');
+        Notiflix.Notify.info('Вы достигли дна');
+      }
+      galleryPhoto.insertAdjacentHTML('beforeend', handelBars(name));
+      let nameOfPictures = new SimpleLightbox('.gallery a');
+}
