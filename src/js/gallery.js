@@ -82,5 +82,5 @@ async function photoNovieOtrisovka(name) {
         Notiflix.Notify.info('Вы достигли дна');
       }
       galleryPhoto.insertAdjacentHTML('beforeend', handelBars(name));
-      let nameOfPictures = new SimpleLightbox('.gallery a');
+      // let nameOfPictures = new SimpleLightbox('.gallery a');
 }
